@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using RemoteChecker.Models;   // пространство имен моделей
+using Microsoft.EntityFrameworkCore; // пространство имен EntityFramework
 
-namespace RemoteHostChecker
+namespace RemoteChecker
 {
     public class Startup
     {
@@ -23,7 +25,9 @@ namespace RemoteHostChecker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<CheckContext>(options => options.UseSqlServer(connection));
+            services.AddControllersWithViews(); 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,11 +39,10 @@ namespace RemoteHostChecker
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -49,7 +52,9 @@ namespace RemoteHostChecker
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

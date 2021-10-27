@@ -1,0 +1,32 @@
+﻿@model IEnumerable<RemoteChecker.Models.Person>
+@{
+    //ViewData["Title"] = "Список пользователей";
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Список пользователей</title>
+</head>
+<body>
+    <h3>Пользователи</h3>
+    <table>
+        <tr>
+            <td>Логин</td>
+            <td>Пароль</td>
+            <td>Роль</td>
+            <td></td>
+        </tr>
+        @foreach (var person in Model)
+        {
+            <tr>
+                <td>@person.Login</td>
+                <td>@person.Password</td>
+                <td>"@(person.Role == 1 ? "Администратор" : "Пользователь")" </td>
+                <td><a href="~/Home/Destroy/@person.ID">Уничтожить</a></td>
+            </tr>
+        }
+    </table>
+</body>
+</html>
