@@ -16,19 +16,17 @@ namespace RemoteChecker.TestData
                     {
                         Login = "admin",
                         Password = "admin",
-                        Role = 1
+                        Role = true
                     },
                     new Models.Person
                     {
                         Login = "user1",
-                        Password = "pass1",
-                        Role = 0
+                        Password = "pass1"
                     },
                     new Models.Person
                     {
                         Login = "user2",
-                        Password = "pass2",
-                        Role = 0
+                        Password = "pass2"
                     }
                 );
                 context.SaveChanges();

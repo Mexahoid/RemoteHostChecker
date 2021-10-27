@@ -1,0 +1,40 @@
+﻿@model IEnumerable<RemoteChecker.Models.Person>
+
+@{
+    ViewData["Title"] = "Список пользователей";
+}
+
+<h1>Список пользователей</h1>
+
+<p>
+    <a asp-action="Create">Добавить нового пользователя</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Логин
+            </th>
+            <th>
+                Администратор
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Login)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Role)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID">Редактировать</a> |
+                <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

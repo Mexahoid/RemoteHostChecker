@@ -23,7 +23,7 @@
             <tr>
                 <td>@person.Login</td>
                 <td>@person.Password</td>
-                <td>"@(person.Role == 1 ? "Администратор" : "Пользователь")" </td>
+                <td>"@(person.Role ? "Администратор" : "Пользователь")" </td>
                 <td><a href="~/Home/Destroy/@person.ID">Уничтожить</a></td>
             </tr>
         }

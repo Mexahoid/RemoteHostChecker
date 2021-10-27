@@ -16,5 +16,15 @@ namespace RemoteChecker.Models
         {
             Database.EnsureCreated();
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Person>()
+                .HasIndex(b => b.Login)
+                .IsUnique();
+            modelBuilder.Entity<Person>()
+                .Property(b => b.Password)
+                .IsRequired();
+        }
     }
 }

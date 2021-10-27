@@ -23,7 +23,7 @@ namespace RemoteChecker.Controllers
 
         public IActionResult Index()
         {
-            return View(db.Persons.ToList());
+            return Redirect("Person");
         }
 
         public IActionResult Destroy(int id)
