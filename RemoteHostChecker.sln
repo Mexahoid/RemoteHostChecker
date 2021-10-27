@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteHostChecker", "RemoteHostChecker\RemoteHostChecker.csproj", "{6932B743-05A5-44F8-9CA1-FE30AB5800D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbLibrary", "DbLibrary\DbLibrary.csproj", "{B357983F-5FBA-4A61-BC0B-CFB4BF6EF661}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbLibrary", "DbLibrary\DbLibrary.csproj", "{B357983F-5FBA-4A61-BC0B-CFB4BF6EF661}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbLibraryFramework", "DbLibraryFramework\DbLibraryFramework.csproj", "{5A0CC488-6CE6-4AB6-9448-FEA8C7487525}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B357983F-5FBA-4A61-BC0B-CFB4BF6EF661}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B357983F-5FBA-4A61-BC0B-CFB4BF6EF661}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B357983F-5FBA-4A61-BC0B-CFB4BF6EF661}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A0CC488-6CE6-4AB6-9448-FEA8C7487525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A0CC488-6CE6-4AB6-9448-FEA8C7487525}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A0CC488-6CE6-4AB6-9448-FEA8C7487525}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A0CC488-6CE6-4AB6-9448-FEA8C7487525}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
