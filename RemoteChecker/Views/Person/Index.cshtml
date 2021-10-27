@@ -6,9 +6,6 @@
 
 <h1>Список пользователей</h1>
 
-<p>
-    <a asp-action="Create">Добавить нового пользователя</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -16,7 +13,7 @@
                 Логин
             </th>
             <th>
-                Администратор
+                Тут будет количество задач
             </th>
             <th></th>
         </tr>
@@ -31,8 +28,7 @@
                 @Html.DisplayFor(modelItem => item.Role)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Редактировать</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
+                <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
             </td>
         </tr>
 }
