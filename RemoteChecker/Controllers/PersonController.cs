@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using RemoteChecker.Models;
 
 namespace RemoteChecker.Controllers
 {
+    [Authorize]
     public class PersonController : Controller
     {
         private readonly CheckContext _context;
@@ -18,7 +20,6 @@ namespace RemoteChecker.Controllers
             _context = context;
         }
 
-        // GET: Person
         public async Task<IActionResult> Index()
         {
             return View(await _context.Persons.ToListAsync());
@@ -48,9 +49,6 @@ namespace RemoteChecker.Controllers
             return View();
         }
 
-        // POST: Person/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Login,Password,Role")] Person person)
@@ -59,7 +57,7 @@ namespace RemoteChecker.Controllers
             {
                 ModelState.AddModelError("Login", "Логин не может быть пустым");
             } 
-            else if ((from p in _context.Persons where p.Login == person.Login select p).Count() > 0)
+            else if ((from p in _context.Persons where p.Login == person.Login select p).Any())
             {
                 ModelState.AddModelError("Login", "Такой логин уже существует");
             }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using RemoteChecker.Models;
 using System;
@@ -20,18 +21,11 @@ namespace RemoteChecker.Controllers
             db = context;
         }
 
-
+        [Authorize]
         public IActionResult Index()
         {
             return Redirect("Person");
         }
 
-        public IActionResult Destroy(int id)
-        {
-            var z = (from p in db.Persons where p.ID == id select p).FirstOrDefault();
-            db.Persons.Remove(z);
-            db.SaveChanges();
-            return View("Index", db.Persons.ToList());
-        }
     }
 }

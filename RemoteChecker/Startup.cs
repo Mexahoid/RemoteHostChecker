@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RemoteChecker.Models;   // пространство имен моделей
 using Microsoft.EntityFrameworkCore; // пространство имен EntityFramework
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace RemoteChecker
 {
@@ -27,6 +28,13 @@ namespace RemoteChecker
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<CheckContext>(options => options.UseSqlServer(connection));
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => //CookieAuthenticationOptions
+                {
+                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                });
+
             services.AddControllersWithViews(); 
         }
 
@@ -40,7 +48,6 @@ namespace RemoteChecker
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
@@ -48,6 +55,7 @@ namespace RemoteChecker
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

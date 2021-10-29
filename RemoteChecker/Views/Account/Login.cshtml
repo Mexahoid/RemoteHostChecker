@@ -1,0 +1,33 @@
+﻿@model RemoteChecker.ViewModels.LoginModel
+@{
+    ViewData["Title"] = "Авторизация";
+}
+
+<h2>Авторизация</h2>
+
+<a asp-action="Register" asp-controller="Account">Не зарегистрированы?</a>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Login" asp-controller="Account" asp-anti-forgery="true">
+            <div class="validation" asp-validation-summary="ModelOnly"></div>
+            <div class="form-group">
+                <label asp-for="Login">Введите логин</label><br />
+                <input type="text" asp-for="Login" />
+                <span asp-validation-for="Login" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Password">Введите пароль</label><br />
+                <input asp-for="Password" />
+                <span asp-validation-for="Password" class="text-danger" />
+            </div>
+            <hr />
+            <div class="form-group">
+                <input type="submit" value="Войти" class="btn btn-outline-dark" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
