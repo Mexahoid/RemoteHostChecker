@@ -42,19 +42,17 @@ namespace RemoteChecker.Controllers
             {
                 ModelState.AddModelError("Password", "Пароль не может быть пустым");
             }
+            if (!ModelState.IsValid)
+                return View(model);
             Person person = await db.Persons.FirstOrDefaultAsync(u => u.Login == model.Login && u.Password == model.Password);
             if (person == null)
             {
-                ModelState.AddModelError("Login", "Нет такой пары логин-пароль");
+                ModelState.AddModelError("Login", "Неверный пароль");
+                return View(model);
             }
 
-            if (ModelState.IsValid)
-            {
-                
-                await Authenticate(model.Login); // аутентификация
-                return RedirectToAction("Index", "");
-            }
-            return View(model);
+            await Authenticate(model.Login); // аутентификация
+            return RedirectToAction("Index", "");
         }
         [HttpGet]
         public IActionResult Register()
@@ -80,7 +78,7 @@ namespace RemoteChecker.Controllers
             }
             if (model.ConfirmPassword != model.Password)
             {
-                ModelState.AddModelError("ConfirmPassword", "Пароль не должен быть пустым");
+                ModelState.AddModelError("ConfirmPassword", "Пароли не совпадают");
             }
 
 
