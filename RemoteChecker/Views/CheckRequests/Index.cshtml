@@ -1,10 +1,13 @@
 ﻿@model IEnumerable<RemoteChecker.Models.CheckRequest>
 
 @{
-    ViewData["Title"] = "Мои чекеры";
+    if (User.Identity.Name == "admin")
+        ViewData["Title"] = "Список чекеров";
+    else
+        ViewData["Title"] = "Мои чекеры";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
     <a asp-action="Create">Добавить чекер</a>
@@ -43,8 +46,8 @@
                 @Html.DisplayFor(modelItem => item.Person.Login)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                <a asp-action="Edit" asp-route-id="@item.ID">Изменить</a> |
+                <a asp-action="Details" asp-route-id="@item.ID">Информация</a> |
                 <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
             </td>
         </tr>
