@@ -1,0 +1,39 @@
+﻿@model RemoteChecker.Models.CheckRequest
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>CheckRequest</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="HostAddress" class="control-label"></label>
+                <input asp-for="HostAddress" class="form-control" />
+                <span asp-validation-for="HostAddress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Cron" class="control-label"></label>
+                <input asp-for="Cron" class="form-control" />
+                <span asp-validation-for="Cron" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PersonID" class="control-label"></label>
+                <select asp-for="PersonID" class ="form-control" asp-items="ViewBag.PersonID"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

@@ -41,6 +41,8 @@ namespace RemoteChecker.Controllers
             }
 
             var person = await _context.Persons
+                .Include(u => u.Role)
+                .Include(u => u.CheckRequests)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (person == null)
             {

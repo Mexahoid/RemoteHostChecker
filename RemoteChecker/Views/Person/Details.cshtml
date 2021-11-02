@@ -1,22 +1,63 @@
 ﻿@model RemoteChecker.Models.Person
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Список чекеров";
 }
 
 <h1>Информация о пользователе</h1>
 
 <div>
-    <h4>Логин: @Html.DisplayFor(model => model.Login)</h4>
+    @if (User.Identity.Name == "admin")
+    {
+        <h4>Логин: @Html.DisplayFor(model => model.Login)</h4>
+    }
+    else
+    {
+        <p>
+            <a asp-controller="CheckRequests" asp-action="Create">Добавить новый</a>
+        </p>
+    }
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            228 задач
-        </dt>
-    </dl>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Адрес хоста
+                </th>
+                <th>
+                    CRON
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.CheckRequests)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.HostAddress)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Cron)
+                    </td>
+                    <td>
+                        <a asp-controller="CheckRequests" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                        <a asp-controller="CheckRequests" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                        <a asp-controller="CheckRequests" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 <div>
-    <a asp-action="Delete" asp-route-id="@Model.ID">Удалить пользователя</a>
-    <br/>
+    @if (User.Identity.Name == "admin")
+    {
+        <a asp-action="Delete" asp-route-id="@Model.ID">Удалить пользователя</a>
+        <br />
+    }
     <a asp-action="Index">Назад к списку пользователей</a>
 </div>
+
+
