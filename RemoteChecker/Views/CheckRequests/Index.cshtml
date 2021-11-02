@@ -1,10 +1,7 @@
 ﻿@model IEnumerable<RemoteChecker.Models.CheckRequest>
 
 @{
-    if (User.Identity.Name == "admin")
-        ViewData["Title"] = "Список чекеров";
-    else
-        ViewData["Title"] = "Мои чекеры";
+    ViewData["Title"] = (bool)ViewData["admin"] ? "Список чекеров" : "Мои чекеры";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -46,9 +43,18 @@
                 @Html.DisplayFor(modelItem => item.Person.Login)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Изменить</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Информация</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
+                @{
+                    if ((bool)ViewData["admin"] && item.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ID">Изменить</a>
+                        <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
+                        <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
+                    }
+                    else
+                    {
+                        <a asp-action="ActiveChange" asp-route-id="@item.ID">@(item.Active ? "Деактивировать" : "Активировать")</a>
+                    }
+                }
             </td>
         </tr>
 }

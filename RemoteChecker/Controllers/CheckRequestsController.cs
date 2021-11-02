@@ -31,6 +31,9 @@ namespace RemoteChecker.Controllers
             {
                 p = (from pr in _context.Persons where pr.Login == login select pr).FirstOrDefault();
             }
+
+            ViewData["admin"] = p.Login == "admin";
+
             switch (id)
             {
                 case 1:
