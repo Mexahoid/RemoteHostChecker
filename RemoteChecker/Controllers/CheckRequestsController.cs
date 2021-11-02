@@ -37,7 +37,7 @@ namespace RemoteChecker.Controllers
                     var checkContext = _context.CheckRequests.Include(c => c.Person);
                     return View(await checkContext.ToListAsync());
                 case 2:
-                    var checkContext2 = _context.CheckRequests.Include(c => c.Person).Where(c => c.Person.RoleID == id);
+                    var checkContext2 = _context.CheckRequests.Include(c => c.Person).Where(c => c.Person.ID == p.ID);
                     return View(await checkContext2.ToListAsync());
                 default:
                     return Redirect("Error");
