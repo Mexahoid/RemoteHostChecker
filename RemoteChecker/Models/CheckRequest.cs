@@ -14,6 +14,7 @@ namespace RemoteChecker.Models
         public int ID { get; set; }
         public string HostAddress { get; set; }
         public string Cron { get; set; }
+        public bool Active { get; set; }
 
         public int PersonID { get; set; }
         public Person Person { get; set; }

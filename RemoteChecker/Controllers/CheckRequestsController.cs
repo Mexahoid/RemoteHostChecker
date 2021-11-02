@@ -67,7 +67,6 @@ namespace RemoteChecker.Controllers
         // GET: CheckRequests/Create
         public IActionResult Create()
         {
-            ViewData["PersonID"] = new SelectList(_context.Persons, "ID", "ID");
             return View();
         }
 
@@ -78,13 +77,17 @@ namespace RemoteChecker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,HostAddress,Cron,PersonID")] CheckRequest checkRequest)
         {
+
+            string login = User.Identity.Name;
+            int? id = (from r in _context.Persons where r.Login == login select r).FirstOrDefault()?.ID;
+            checkRequest.PersonID = (int)id;
+
             if (ModelState.IsValid)
             {
                 _context.Add(checkRequest);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PersonID"] = new SelectList(_context.Persons, "ID", "ID", checkRequest.PersonID);
             return View(checkRequest);
         }
 

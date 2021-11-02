@@ -1,4 +1,5 @@
 ﻿@{
+    var pageController = ViewContext.RouteData.Values["controller"].ToString();
     var pageName = ViewContext.RouteData.Values["action"].ToString();
 }
 
@@ -26,12 +27,18 @@
                     <ul class="navbar-nav flex-grow-1">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Person" asp-action="Index">Пользователи</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="CheckRequests" asp-action="Index">Чекеры</a>
-                            </li>
+                            if (User.Identity.Name == "admin" && (pageController != "Person" || pageName != "Index"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Person" asp-action="Index">Пользователи</a>
+                                </li>
+                            }
+                            if (pageController != "CheckRequests" || pageName != "Index")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="CheckRequests" asp-action="Index">Чекеры</a>
+                                </li>
+                            }
                         }
                     </ul>
                 </div>
@@ -46,7 +53,7 @@
                                 <span class="nav-link text-dark">|</span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">выйти</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Выйти</a>
                             </li>
                         }
                         else if (pageName != "Login")

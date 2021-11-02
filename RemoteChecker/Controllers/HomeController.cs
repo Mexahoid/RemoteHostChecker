@@ -38,7 +38,7 @@ namespace RemoteChecker.Controllers
                 case 1:
                     return Redirect("Person");
                 case 2:
-                    return View(p);
+                    return Redirect("CheckRequests");
                 default:
                     return Redirect("Error");
             }
