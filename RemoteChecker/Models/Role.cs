@@ -9,11 +9,8 @@ namespace RemoteChecker.Models
     {
         public int ID { get; set; }
         public string Name { get; set; }
-        public List<Person> Persons { get; set; }
 
-        public Role()
-        {
-            Persons = new List<Person>();
-        }
+        public ICollection<Person> Persons { get; set; }
+        
     }
 }

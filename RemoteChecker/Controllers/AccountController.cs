@@ -20,6 +20,7 @@ namespace RemoteChecker.Controllers
         {
             db = context;
         }
+
         [HttpGet]
         public IActionResult Login()
         {

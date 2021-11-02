@@ -22,7 +22,13 @@ namespace RemoteChecker.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Persons.ToListAsync());
+            var a = await _context.Persons
+                    .Include(u => u.Role)
+                    .ToListAsync();
+
+            var b = a[0].Role;
+
+            return View(a);
         }
 
         // GET: Person/Details/5
