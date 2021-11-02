@@ -50,9 +50,17 @@ else
                     @Html.DisplayFor(modelItem => item.Active)
                 </td>
                 <td>
-                    <a asp-controller="CheckRequests" asp-action="Edit" asp-route-id="@item.ID">Изменить</a> |
-                    <a asp-controller="CheckRequests" asp-action="Details" asp-route-id="@item.ID">Информация</a> |
+                    @if ((bool)ViewData["admin"])
+                    {
+                        <a asp-action="ActiveChange" asp-route-id="@item.ID">@(item.Active ? "Деактивировать" : "Активировать")</a>
+                    }
+                    @if ((bool)ViewData["admin"] && item.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
+                    {
+                        <a asp-controller="CheckRequests" asp-action="Edit" asp-route-id="@item.ID">Изменить</a>
+                        <a asp-controller="CheckRequests" asp-action="Details" asp-route-id="@item.ID">Информация</a>
+                    }
                     <a asp-controller="CheckRequests" asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
+
                 </td>
             </tr>
             }
@@ -60,7 +68,7 @@ else
     </table>
 </div>
 <div>
-    @if (User.Identity.Name == "admin" && Model.Role.Name != "Администратор")
+    @if ((bool)ViewData["admin"] && Model.Role.Name != "Администратор")
     {
         <a asp-action="Delete" asp-route-id="@Model.ID">Удалить пользователя</a>
         <br />

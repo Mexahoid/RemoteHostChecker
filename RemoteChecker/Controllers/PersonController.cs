@@ -10,7 +10,7 @@ using RemoteChecker.Models;
 
 namespace RemoteChecker.Controllers
 {
-    [Authorize]
+    [Authorize(Roles="Администратор")]
     public class PersonController : Controller
     {
         private readonly CheckContext _context;
@@ -22,6 +22,7 @@ namespace RemoteChecker.Controllers
 
         public async Task<IActionResult> Index()
         {
+
             var a = await _context.Persons
                     .Include(u => u.Role)
                     .Include(u => u.CheckRequests)
@@ -32,9 +33,35 @@ namespace RemoteChecker.Controllers
             return View(a);
         }
 
+
+        public async Task<IActionResult> ActiveChange(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var checkRequest = await _context.CheckRequests
+                .Include(c => c.Person)
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (checkRequest == null)
+            {
+                return NotFound();
+            }
+
+            checkRequest.Active = !checkRequest.Active;
+            _context.Update(checkRequest);
+            await _context.SaveChangesAsync();
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
+
         // GET: Person/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            ViewData["admin"] = p != null && p.Role.Name == "Администратор";
+
             if (id == null)
             {
                 return NotFound();

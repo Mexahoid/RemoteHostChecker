@@ -28,35 +28,36 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.HostAddress)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cron)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Active)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Person.Login)
-            </td>
-            <td>
-                @{
-                    if ((bool)ViewData["admin"] && item.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.ID">Изменить</a>
-                        <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HostAddress)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Cron)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Active)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Person.Login)
+                </td>
+                <td>
+                    @{
+                        if ((bool)ViewData["admin"])
+                        {
+                            <a asp-action="ActiveChange" asp-route-id="@item.ID">@(item.Active ? "Деактивировать" : "Активировать")</a>
+                        }
+                        if ((bool)ViewData["admin"] && item.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.ID">Изменить</a>
+                            <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
+                        }
                         <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
                     }
-                    else
-                    {
-                        <a asp-action="ActiveChange" asp-route-id="@item.ID">@(item.Active ? "Деактивировать" : "Активировать")</a>
-                    }
-                }
-            </td>
-        </tr>
-}
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

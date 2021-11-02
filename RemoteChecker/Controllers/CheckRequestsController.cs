@@ -23,17 +23,10 @@ namespace RemoteChecker.Controllers
 
         public async Task<IActionResult> Index()
         {
-            string role = User.FindFirst(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value;
-            string login = User.Identity.Name;
-            int? id = (from r in _context.Roles where r.Name == role select r).FirstOrDefault()?.ID;
-            Person p = null;
-            if (id != null)
-            {
-                p = (from pr in _context.Persons where pr.Login == login select pr).FirstOrDefault();
-            }
 
-            ViewData["admin"] = p.Login == "admin";
-
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            ViewData["admin"] = p != null && p.Role.Name == "Администратор";
+            int id = p.RoleID;
             switch (id)
             {
                 case 1:
@@ -65,6 +58,31 @@ namespace RemoteChecker.Controllers
             }
 
             return View(checkRequest);
+        }
+
+
+        // GET: CheckRequests/ActiveChange/5
+        public async Task<IActionResult> ActiveChange(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var checkRequest = await _context.CheckRequests
+                .Include(c => c.Person)
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (checkRequest == null)
+            {
+                return NotFound();
+            }
+
+            checkRequest.Active = !checkRequest.Active;
+            _context.Update(checkRequest);
+            await _context.SaveChangesAsync();
+            return Redirect(Request.Headers["Referer"].ToString());
+
+            //return View();
         }
 
         // GET: CheckRequests/Create
