@@ -1,12 +1,11 @@
 ﻿@model RemoteChecker.Models.CheckRequest
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Изменение чекера";
 }
 
-<h1>Edit</h1>
+<h1>Изменение чекера</h1>
 
-<h4>CheckRequest</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,28 +13,29 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ID" />
             <div class="form-group">
-                <label asp-for="HostAddress" class="control-label"></label>
+                <label class="control-label">Адрес хоста</label>
                 <input asp-for="HostAddress" class="form-control" />
                 <span asp-validation-for="HostAddress" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Cron" class="control-label"></label>
+                <label class="control-label">CRON-выражение</label>
                 <input asp-for="Cron" class="form-control" />
                 <span asp-validation-for="Cron" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PersonID" class="control-label"></label>
-                <select asp-for="PersonID" class="form-control" asp-items="ViewBag.PersonID"></select>
-                <span asp-validation-for="PersonID" class="text-danger"></span>
+                <label class="control-label">Активен</label>
+                <input asp-for="Active" />
+                <span asp-validation-for="Active" class="text-danger"></span>
             </div>
+            <input type="hidden" asp-for="PersonID" />
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Сохранить изменения" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Назад к списку</a>
 </div>
 

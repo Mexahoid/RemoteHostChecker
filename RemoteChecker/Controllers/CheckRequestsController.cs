@@ -75,7 +75,7 @@ namespace RemoteChecker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,HostAddress,Cron,PersonID")] CheckRequest checkRequest)
+        public async Task<IActionResult> Create([Bind("ID,HostAddress,Cron,Active,PersonID")] CheckRequest checkRequest)
         {
 
             string login = User.Identity.Name;
@@ -99,12 +99,14 @@ namespace RemoteChecker.Controllers
                 return NotFound();
             }
 
-            var checkRequest = await _context.CheckRequests.FindAsync(id);
+            var checkRequest = await _context.CheckRequests
+                .Include(c => c.Person)
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (checkRequest == null)
             {
                 return NotFound();
             }
-            ViewData["PersonID"] = new SelectList(_context.Persons, "ID", "ID", checkRequest.PersonID);
+            ViewData["PersonID"] = checkRequest.PersonID;
             return View(checkRequest);
         }
 
@@ -113,7 +115,7 @@ namespace RemoteChecker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,HostAddress,Cron,PersonID")] CheckRequest checkRequest)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,HostAddress,Cron,Active,PersonID")] CheckRequest checkRequest)
         {
             if (id != checkRequest.ID)
             {
@@ -140,7 +142,6 @@ namespace RemoteChecker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PersonID"] = new SelectList(_context.Persons, "ID", "ID", checkRequest.PersonID);
             return View(checkRequest);
         }
 
