@@ -15,7 +15,7 @@ namespace RemoteChecker.Controllers
 {
     public class AccountController : Controller
     {
-        private CheckContext db;
+        private readonly CheckContext db;
         public AccountController(CheckContext context)
         {
             db = context;
@@ -44,14 +44,23 @@ namespace RemoteChecker.Controllers
             }
             if (!ModelState.IsValid)
                 return View(model);
-            Person person = await db.Persons.FirstOrDefaultAsync(u => u.Login == model.Login && u.Password == model.Password);
+
+            string pwd = Security.PasswordManager.HashPassword(model.Login, model.Password);
+
+            Person person = await db.Persons
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(
+                        u => u.Login == model.Login && 
+                        Security.PasswordManager.ValidatePassword(model.Login, model.Password, pwd)
+                );
+
             if (person == null)
             {
                 ModelState.AddModelError("Login", "Неверный пароль");
                 return View(model);
             }
 
-            await Authenticate(model.Login); // аутентификация
+            await Authenticate(person); // аутентификация
             return RedirectToAction("Index", "");
         }
         [HttpGet]
@@ -80,28 +89,33 @@ namespace RemoteChecker.Controllers
             {
                 ModelState.AddModelError("ConfirmPassword", "Пароли не совпадают");
             }
-
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                db.Persons.Add(new Person { Login = model.Login, Password = model.Password });
-                await db.SaveChangesAsync();
-                await Authenticate(model.Login); // аутентификация
-                return RedirectToAction("Index", "");
+                return View(model);
             }
-            return View(model);
+
+            string pwd = Security.PasswordManager.HashPassword(model.Login, model.Password);
+            Person pers = new() { Login = model.Login, Password = pwd };
+            Role r = await db.Roles.FirstOrDefaultAsync(r => r.Name == "Пользователь");
+            if (r != null)
+                pers.Role = r;
+
+            db.Persons.Add(pers);
+            await db.SaveChangesAsync();
+            await Authenticate(pers); // аутентификация
+            return RedirectToAction("Index", "");
         }
 
-        private async Task Authenticate(string userName)
+        private async Task Authenticate(Person person)
         {
-            // создаем один claim
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
-            };
-            // создаем объект ClaimsIdentity
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            // установка аутентификационных куки
+                new Claim(ClaimsIdentity.DefaultNameClaimType, person.Login),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, person.Role?.Name)
+            }; 
+            ClaimsIdentity id = new(claims, "ApplicationCookie", 
+                ClaimsIdentity.DefaultNameClaimType,
+                ClaimsIdentity.DefaultRoleClaimType);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
 

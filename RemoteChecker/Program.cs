@@ -23,7 +23,6 @@ namespace RemoteChecker
                 try
                 {
                     var context = services.GetRequiredService<Models.CheckContext>();
-                    TestData.TestFields.Initialize(context);
                 }
                 catch (Exception ex)
                 {

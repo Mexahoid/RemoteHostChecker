@@ -11,6 +11,7 @@ namespace RemoteChecker.Models
         public DbSet<Person> Persons { get; set; }
         public DbSet<CheckRequest> CheckRequests { get; set; }
         public DbSet<CheckHistory> CheckHistories { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         public CheckContext(DbContextOptions<CheckContext> options) : base(options)
         {
@@ -19,12 +20,21 @@ namespace RemoteChecker.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Person>()
-                .HasIndex(b => b.Login)
-                .IsUnique();
-            modelBuilder.Entity<Person>()
-                .Property(b => b.Password)
-                .IsRequired();
+            string adminRoleName = "Администратор";
+            string userRoleName = "Пользователь";
+            string adminLogin = "admin";
+            string adminPassword = "Pa$$w0rd";
+            adminPassword = Security.PasswordManager.HashPassword(adminLogin, adminPassword);
+
+            Role adminRole = new() { ID = 1, Name = adminRoleName };
+            Role userRole = new() { ID = 2, Name = userRoleName };
+
+            Person admin = new() { ID = 1, Login = adminLogin, Password = adminPassword, RoleID = adminRole.ID };
+
+            modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole });
+            modelBuilder.Entity<Person>().HasData(new Person[] { admin });
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
