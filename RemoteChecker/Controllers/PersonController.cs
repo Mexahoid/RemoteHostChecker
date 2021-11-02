@@ -24,6 +24,7 @@ namespace RemoteChecker.Controllers
         {
             var a = await _context.Persons
                     .Include(u => u.Role)
+                    .Include(u => u.CheckRequests)
                     .ToListAsync();
 
             var b = a[0].Role;

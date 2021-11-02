@@ -13,7 +13,10 @@
                 Логин
             </th>
             <th>
-                Тут будет количество чекеров
+                Роль
+            </th>
+            <th>
+                Чекеры
             </th>
             <th></th>
         </tr>
@@ -21,17 +24,20 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Login)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Role.Name)
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Login)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Role.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CheckRequests.Count)
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
+            </td>
+        </tr>
         }
     </tbody>
 </table>
