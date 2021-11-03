@@ -23,7 +23,6 @@ namespace RemoteChecker.Controllers
 
         public async Task<IActionResult> Index()
         {
-
             Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
             ViewData["admin"] = p != null && p.Role.Name == "Администратор";
             int id = p.RoleID;

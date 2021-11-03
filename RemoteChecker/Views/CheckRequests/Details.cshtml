@@ -10,25 +10,20 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HostAddress)
+            Адрес хоста
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.HostAddress)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cron)
+            CRON-выражение
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Cron)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Person)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Person.ID)
-        </dd>
     </dl>
 </div>
+<hr/>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.ID">Изменить</a> |
     <a asp-action="Index">Назад к списку чекеров</a>
