@@ -63,11 +63,13 @@ namespace RemoteChecker.Controllers
             if (checkRequest.PersonID == p.ID || p.Role.Name == "Администратор")
                 return View(checkRequest);
             else
-                return RedirectToAction(nameof(Unauthorized));
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка просмотра истории чужого чекера" });
         }
 
-        public new IActionResult Unauthorized()
+
+        public IActionResult Unauthorized(string message)
         {
+            ViewData["err"] = message;
             return View();
         }
 
@@ -87,6 +89,11 @@ namespace RemoteChecker.Controllers
             {
                 return NotFound();
             }
+
+
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка смены состояния активности чужого чекера" });
 
             checkRequest.Active = !checkRequest.Active;
             _context.Update(checkRequest);
@@ -109,7 +116,6 @@ namespace RemoteChecker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,HostAddress,Cron,Active,PersonID")] CheckRequest checkRequest)
         {
-
             string login = User.Identity.Name;
             int? id = (from r in _context.Persons where r.Login == login select r).FirstOrDefault()?.ID;
             checkRequest.PersonID = (int)id;
@@ -138,6 +144,11 @@ namespace RemoteChecker.Controllers
             {
                 return NotFound();
             }
+
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка изменения чужого чекера" });
+
             ViewData["PersonID"] = checkRequest.PersonID;
             return View(checkRequest);
         }
@@ -157,6 +168,10 @@ namespace RemoteChecker.Controllers
             {
                 return NotFound();
             }
+
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка запуска чужого чекера" });
 
             CheckHistory ch = new()
             {
@@ -185,6 +200,12 @@ namespace RemoteChecker.Controllers
             {
                 return NotFound();
             }
+
+
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка изменения чужого чекера" });
+
 
             if (ModelState.IsValid)
             {
@@ -224,6 +245,11 @@ namespace RemoteChecker.Controllers
             {
                 return NotFound();
             }
+
+
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка удаления чужого чекера" });
 
             return View(checkRequest);
         }
