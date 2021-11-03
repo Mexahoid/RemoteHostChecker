@@ -43,6 +43,9 @@ namespace RemoteChecker.Controllers
         // GET: CheckRequests/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            ViewData["admin"] = p != null && p.Role.Name == "Администратор";
+
             if (id == null)
             {
                 return NotFound();
@@ -50,13 +53,22 @@ namespace RemoteChecker.Controllers
 
             var checkRequest = await _context.CheckRequests
                 .Include(c => c.Person)
+                .Include(c => c.CheckHistories)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (checkRequest == null)
             {
                 return NotFound();
             }
 
-            return View(checkRequest);
+            if (checkRequest.PersonID == p.ID || p.Role.Name == "Администратор")
+                return View(checkRequest);
+            else
+                return RedirectToAction(nameof(Unauthorized));
+        }
+
+        public new IActionResult Unauthorized()
+        {
+            return View();
         }
 
 
@@ -128,6 +140,38 @@ namespace RemoteChecker.Controllers
             }
             ViewData["PersonID"] = checkRequest.PersonID;
             return View(checkRequest);
+        }
+
+        // GET: CheckRequests/Update/5
+        public async Task<IActionResult> Update(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var checkRequest = await _context.CheckRequests
+                .Include(c => c.CheckHistories)
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (checkRequest == null)
+            {
+                return NotFound();
+            }
+
+            CheckHistory ch = new()
+            {
+                CheckID = checkRequest.ID,
+                Moment = DateTime.Now,
+                // todo: Обновить
+                Result = 200
+            };
+
+            checkRequest.CheckHistories.Add(ch);
+
+            _context.Add(ch);
+            await _context.SaveChangesAsync();
+            return Redirect(Request.Headers["Referer"].ToString());
+
         }
 
         // POST: CheckRequests/Edit/5

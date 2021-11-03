@@ -4,27 +4,59 @@
     ViewData["Title"] = "Информация";
 }
 
-<h1>Информация</h1>
+<h1>Информация @(Model.Person.Login == User.Identity.Name ? "" : "о чекере пользователя " + Model.Person.Login)</h1>
 
 <div>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             Адрес хоста
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.HostAddress)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             CRON-выражение
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Cron)
         </dd>
     </dl>
+    <hr />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Время запроса
+                </th>
+                <th>
+                    Результат
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.CheckHistories)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(mitem => item.Moment)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(mitem => item.Result)
+                    </td>
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
-<hr/>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.ID">Изменить</a> |
+    @if ((bool)ViewData["admin"] && Model.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
+    {
+        <a asp-action="Update" asp-route-id="@Model.ID">Вызвать чекер</a>
+        <span>|</span>
+        <a asp-action="Edit" asp-route-id="@Model.ID">Изменить</a>
+        <span>|</span>
+    }
     <a asp-action="Index">Назад к списку чекеров</a>
 </div>
