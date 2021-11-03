@@ -48,14 +48,15 @@
                         if ((bool)ViewData["admin"])
                         {
                             <a asp-action="ActiveChange" asp-route-id="@item.ID">@(item.Active ? "Деактивировать" : "Активировать")</a>
+                            <span>|</span>
                         }
                         if ((bool)ViewData["admin"] && item.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
                         {
                             <a asp-action="Edit" asp-route-id="@item.ID">Изменить</a>
                             <span>|</span>
                             <a asp-action="Details" asp-route-id="@item.ID">Информация</a>
+                            <span>|</span>
                         }
-                        <span>|</span>
                         <a asp-action="Delete" asp-route-id="@item.ID">Удалить</a>
                     }
                 </td>
