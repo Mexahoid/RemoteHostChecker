@@ -85,32 +85,6 @@ namespace RemoteChecker.Controllers
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Login,Password,Role")] Person person)
-        {
-            if (string.IsNullOrEmpty(person.Login))
-            {
-                ModelState.AddModelError("Login", "Логин не может быть пустым");
-            } 
-            else if ((from p in _context.Persons where p.Login == person.Login select p).Any())
-            {
-                ModelState.AddModelError("Login", "Такой логин уже существует");
-            }
-            if (string.IsNullOrEmpty(person.Password))
-            {
-                ModelState.AddModelError("Password", "Пароль не должен быть пустым");
-            }
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(person);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(person);
-        }
-
 
         // GET: Person/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -121,12 +95,12 @@ namespace RemoteChecker.Controllers
             }
 
             var person = await _context.Persons
+                .Include(p => p.CheckRequests)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (person == null)
             {
                 return NotFound();
             }
-
             return View(person);
         }
 

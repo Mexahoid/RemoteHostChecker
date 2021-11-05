@@ -6,22 +6,15 @@
 
 <h1>Удаление пользователя</h1>
 
-<h3>Действительно хотите грохнуть этого пользователя?</h3>
+<h3>Действительно хотите удалить пользователя @Html.DisplayFor(model => model.Login)?</h3>
 <div>
-    <h4>Логин: @Html.DisplayFor(model => model.Login)</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Password)
+            Количество чекеров:
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Password)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Role)
+            @Html.DisplayFor(model => model.CheckRequests.Count)
         </dd>
     </dl>
     
