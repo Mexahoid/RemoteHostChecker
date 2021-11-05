@@ -178,7 +178,8 @@ namespace RemoteChecker.Controllers
                 CheckID = checkRequest.ID,
                 Moment = DateTime.Now,
                 // todo: Обновить
-                Result = 200
+                // Result = 200
+                Result = await CheckerLogics.PingUrl.PingUrlAsync(checkRequest.HostAddress)
             };
 
             checkRequest.CheckHistories.Add(ch);
