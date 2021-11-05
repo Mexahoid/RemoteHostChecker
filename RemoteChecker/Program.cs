@@ -13,8 +13,6 @@ namespace RemoteChecker
 {
     public class Program
     {
-        private static Worker worker;
-
         public static void Main(string[] args)
         {
 
@@ -26,8 +24,10 @@ namespace RemoteChecker
                 try
                 {
                     var context = services.GetRequiredService<Models.CheckContext>();
-                    worker = Worker.GetInstance();
-                    worker.InitWorker(context);
+
+                    var cc = services.GetService<Models.CheckContext>();
+                    Worker w = Worker.GetInstance();
+                    _ = w.InitWorker(cc);
                 }
                 catch (Exception ex)
                 {

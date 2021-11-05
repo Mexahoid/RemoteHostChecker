@@ -21,6 +21,12 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Cron)
         </dd>
+        <dt class="col-sm-2">
+            Статус
+        </dt>
+        <dd class="col-sm-10">
+            @(Model.Active ? "Активен" : "Неактивен")
+        </dd>
     </dl>
     <hr />
     <table class="table">

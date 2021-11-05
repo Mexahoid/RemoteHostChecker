@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using RemoteChecker.CheckerLogics;
 using RemoteChecker.Models;
 
 namespace RemoteChecker.Controllers
@@ -23,6 +24,9 @@ namespace RemoteChecker.Controllers
 
         public async Task<IActionResult> Index()
         {
+            //await r.CallCheckRequestTasks(_context);
+
+
             Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
             ViewData["admin"] = p != null && p.Role.Name == "Администратор";
             int id = p.RoleID;
@@ -98,6 +102,12 @@ namespace RemoteChecker.Controllers
             checkRequest.Active = !checkRequest.Active;
             _context.Update(checkRequest);
             await _context.SaveChangesAsync();
+
+
+            Worker r = Worker.GetInstance();
+            await r.ChangeCheckRequestActivity(_context, checkRequest);
+
+
             return Redirect(Request.Headers["Referer"].ToString());
 
             //return View();
@@ -124,6 +134,10 @@ namespace RemoteChecker.Controllers
             {
                 _context.Add(checkRequest);
                 await _context.SaveChangesAsync();
+
+                Worker r = Worker.GetInstance();
+                await r.AddCheckRequest(_context, checkRequest);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(checkRequest);
@@ -148,7 +162,7 @@ namespace RemoteChecker.Controllers
             Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
             if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
                 return RedirectToAction(nameof(Unauthorized), new { message = "Попытка изменения чужого чекера" });
-
+            
             ViewData["PersonID"] = checkRequest.PersonID;
             return View(checkRequest);
         }
@@ -173,7 +187,12 @@ namespace RemoteChecker.Controllers
             if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
                 return RedirectToAction(nameof(Unauthorized), new { message = "Попытка запуска чужого чекера" });
 
-            CheckHistory ch = new()
+
+            Worker r = Worker.GetInstance();
+            await r.ForceCheckRequest(_context, checkRequest);
+
+
+            /*CheckHistory ch = new()
             {
                 CheckID = checkRequest.ID,
                 Moment = DateTime.Now,
@@ -185,7 +204,7 @@ namespace RemoteChecker.Controllers
             checkRequest.CheckHistories.Add(ch);
 
             _context.Add(ch);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();*/
             return Redirect(Request.Headers["Referer"].ToString());
 
         }
@@ -214,6 +233,9 @@ namespace RemoteChecker.Controllers
                 {
                     _context.Update(checkRequest);
                     await _context.SaveChangesAsync();
+
+                    Worker r = Worker.GetInstance();
+                    await r.EditCheckRequest(_context, checkRequest);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -263,6 +285,9 @@ namespace RemoteChecker.Controllers
             var checkRequest = await _context.CheckRequests.FindAsync(id);
             _context.CheckRequests.Remove(checkRequest);
             await _context.SaveChangesAsync();
+
+            Worker r = Worker.GetInstance();
+            await r.RemoveCheckRequest(_context, checkRequest);
             return RedirectToAction(nameof(Index));
         }
 

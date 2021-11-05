@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using RemoteChecker.Models;   // пространство имен моделей
 using Microsoft.EntityFrameworkCore; // пространство имен EntityFramework
 using Microsoft.AspNetCore.Authentication.Cookies;
+using RemoteChecker.CheckerLogics;
 
 namespace RemoteChecker
 {
@@ -36,7 +37,10 @@ namespace RemoteChecker
                     options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
 
-            services.AddControllersWithViews(); 
+
+
+            services.AddControllersWithViews();
+            services.AddTransient<Worker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
