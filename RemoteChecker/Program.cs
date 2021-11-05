@@ -7,11 +7,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using RemoteChecker.CheckerLogics;
 
 namespace RemoteChecker
 {
     public class Program
     {
+        private static Worker worker;
+
         public static void Main(string[] args)
         {
 
@@ -23,6 +26,8 @@ namespace RemoteChecker
                 try
                 {
                     var context = services.GetRequiredService<Models.CheckContext>();
+                    worker = Worker.GetInstance();
+                    worker.InitWorker(context);
                 }
                 catch (Exception ex)
                 {
