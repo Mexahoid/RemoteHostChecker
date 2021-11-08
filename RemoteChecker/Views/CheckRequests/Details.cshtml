@@ -1,10 +1,10 @@
-﻿@model RemoteChecker.Models.CheckRequest
+﻿@model RemoteChecker.ViewModels.DateModel
 
 @{
     ViewData["Title"] = "Информация";
 }
 
-<h1>Информация @(Model.Person.Login == User.Identity.Name ? "" : "о чекере пользователя " + Model.Person.Login)</h1>
+<h1>Информация @(Model.CheckRequest.Person.Login == User.Identity.Name ? "" : "о чекере пользователя " + Model.CheckRequest.Person.Login)</h1>
 
 <div>
     <hr />
@@ -13,22 +13,49 @@
             Адрес хоста
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.HostAddress)
+            @Html.DisplayFor(model => model.CheckRequest.HostAddress)
         </dd>
         <dt class="col-sm-2">
             CRON-выражение
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Cron)
+            @Html.DisplayFor(model => model.CheckRequest.Cron)
         </dd>
         <dt class="col-sm-2">
             Статус
         </dt>
         <dd class="col-sm-10">
-            @(Model.Active ? "Активен" : "Неактивен")
+            @(Model.CheckRequest.Active ? "Активен" : "Неактивен")
         </dd>
     </dl>
     <hr />
+
+
+    <form asp-action="DetailsPost">
+        <dl class="row">
+            <dt class="col-sm-2">
+                От:
+            </dt>
+            <dd class="col-sm-10">
+                <input class="form-control" asp-for="@Model.Start" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+            </dd>
+            <dt class="col-sm-2">
+                До:
+            </dt>
+            <dd class="col-sm-10">
+                <input class="form-control" asp-for="@Model.Stop" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+            </dd>
+            <dd class="col-sm-10">
+                <input type="hidden" asp-for="@Model.CheckRequest.ID" />
+                <input type="submit" value="Вывести вызовы в интервале" class="btn btn-danger" />
+            </dd>
+        </dl>
+    </form>
+
+
+
+
+
     <table class="table">
         <thead>
             <tr>
@@ -50,18 +77,18 @@
                     <td>
                         @Html.DisplayFor(mitem => item.Result)
                     </td>
-                    
+
                 </tr>
             }
         </tbody>
     </table>
 </div>
 <div>
-    @if ((bool)ViewData["admin"] && Model.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
+    @if ((bool)ViewData["admin"] && Model.CheckRequest.Person.Login == User.Identity.Name || !(bool)ViewData["admin"])
     {
-        <a asp-action="Update" asp-route-id="@Model.ID">Вызвать чекер</a>
+        <a asp-action="Update" asp-route-id="@Model.CheckRequest.ID">Вызвать чекер</a>
         <span>|</span>
-        <a asp-action="Edit" asp-route-id="@Model.ID">Изменить</a>
+        <a asp-action="Edit" asp-route-id="@Model.CheckRequest.ID">Изменить</a>
         <span>|</span>
     }
     <a asp-action="Index">Назад к списку чекеров</a>

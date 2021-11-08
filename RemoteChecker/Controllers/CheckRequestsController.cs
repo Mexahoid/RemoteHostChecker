@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RemoteChecker.CheckerLogics;
 using RemoteChecker.Models;
+using RemoteChecker.ViewModels;
 
 namespace RemoteChecker.Controllers
 {
@@ -50,6 +52,7 @@ namespace RemoteChecker.Controllers
             Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
             ViewData["admin"] = p != null && p.Role.Name == "Администратор";
 
+
             if (id == null)
             {
                 return NotFound();
@@ -57,15 +60,111 @@ namespace RemoteChecker.Controllers
 
             var checkRequest = await _context.CheckRequests
                 .Include(c => c.Person)
-                .Include(c => c.CheckHistories)
                 .FirstOrDefaultAsync(m => m.ID == id);
+
+            var checkHistories = await _context.CheckHistories
+                .Where(x => x.CheckRequest == checkRequest)
+                .ToListAsync();
+
+            var ax = new List<CheckHistory>();
+            DateTime dstart = DateTime.MaxValue;
+            DateTime dstop = DateTime.MinValue;
+
+            DateModel dm = new();
+
+            foreach (var ch in checkHistories)
+            {
+                if (ch.Moment < dstart)
+                    dstart = ch.Moment;
+                if (ch.Moment > dstop)
+                    dstop = ch.Moment;
+
+                ax.Add(ch);
+            }
+
+            dm.CheckRequest = checkRequest;
+            dm.CheckHistories = ax;
+            dm.Start = dstart;
+            dm.Stop = dstop;
+
             if (checkRequest == null)
             {
                 return NotFound();
             }
 
             if (checkRequest.PersonID == p.ID || p.Role.Name == "Администратор")
-                return View(checkRequest);
+                return View(dm);
+            else
+                return RedirectToAction(nameof(Unauthorized), new { message = "Попытка просмотра истории чужого чекера" });
+        }
+
+
+
+        [HttpPost, ActionName("DetailsPost")]
+        public async Task<IActionResult> DetailsPost(int? id, [Bind("CheckRequest,CheckHistories,Start,Stop")] DateModel model)
+        {
+            Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
+            ViewData["admin"] = p != null && p.Role.Name == "Администратор";
+
+
+            if (model.CheckRequest == null)
+            {
+                return NotFound();
+            }
+
+            var checkRequest = _context.CheckRequests.Find(model.CheckRequest.ID);
+
+            var checkHistories = await _context.CheckHistories
+                .Where(x => x.CheckRequest == checkRequest)
+                .ToListAsync();
+
+            var ax = new List<CheckHistory>();
+            DateTime dstart = DateTime.MaxValue;
+            DateTime dstop = DateTime.MinValue;
+
+            DateModel dm = new DateModel();
+
+            if (model.CheckRequest == null)
+            {
+                foreach (var ch in checkHistories)
+                {
+                    if (ch.Moment < dstart)
+                        dstart = ch.Moment;
+                    if (ch.Moment > dstop)
+                        dstop = ch.Moment;
+
+                    ax.Add(ch);
+                }
+            }
+            else
+            {
+                dstart = model.Start;// DateTime.Parse(start);
+                dstop = model.Stop; // DateTime.Parse(stop);
+
+                foreach (var ch in checkHistories)
+                {
+                    if (ch.Moment <= dstop && ch.Moment >= dstart)
+                        ax.Add(ch);
+                }
+            }
+
+
+            dm.CheckRequest = checkRequest;
+
+
+
+
+            dm.CheckHistories = ax;
+            dm.Start = dstart;
+            dm.Stop = dstop;
+
+            if (checkRequest == null)
+            {
+                return NotFound();
+            }
+
+            if (checkRequest.PersonID == p.ID || p.Role.Name == "Администратор")
+                return View("Details", dm);
             else
                 return RedirectToAction(nameof(Unauthorized), new { message = "Попытка просмотра истории чужого чекера" });
         }
@@ -160,7 +259,7 @@ namespace RemoteChecker.Controllers
             Person p = Security.AdminIdentifier.CheckIfAdmin(User, _context);
             if (checkRequest.PersonID != p.ID && p.Role.Name != "Администратор")
                 return RedirectToAction(nameof(Unauthorized), new { message = "Попытка изменения чужого чекера" });
-            
+
             ViewData["PersonID"] = checkRequest.PersonID;
             return View(checkRequest);
         }
