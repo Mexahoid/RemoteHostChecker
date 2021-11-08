@@ -13,8 +13,24 @@ namespace RemoteChecker.Models
         public DbSet<CheckHistory> CheckHistories { get; set; }
         public DbSet<Role> Roles { get; set; }
 
+        private string connection;
+
         public CheckContext(DbContextOptions<CheckContext> options) : base(options)
         {
+            Database.EnsureCreated();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (connection != null)
+                optionsBuilder.UseSqlServer(connection);
+            else
+                base.OnConfiguring(optionsBuilder);
+        }
+
+        public CheckContext(string connection)
+        {
+            this.connection = connection;
             Database.EnsureCreated();
         }
 

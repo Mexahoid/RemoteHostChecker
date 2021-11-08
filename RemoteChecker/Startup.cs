@@ -12,6 +12,7 @@ using RemoteChecker.Models;   // пространство имен моделей
 using Microsoft.EntityFrameworkCore; // пространство имен EntityFramework
 using Microsoft.AspNetCore.Authentication.Cookies;
 using RemoteChecker.CheckerLogics;
+using RemoteChecker.Controllers;
 
 namespace RemoteChecker
 {
@@ -28,6 +29,7 @@ namespace RemoteChecker
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
+            Worker.Connection = connection;
             services.AddDbContext<CheckContext>(options => options.UseSqlServer(connection));
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

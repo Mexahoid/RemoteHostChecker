@@ -27,7 +27,7 @@ namespace RemoteChecker
 
                     var cc = services.GetService<Models.CheckContext>();
                     Worker w = Worker.GetInstance();
-                    _ = w.InitWorker(cc);
+                    _ = w.InitWorker();
                 }
                 catch (Exception ex)
                 {

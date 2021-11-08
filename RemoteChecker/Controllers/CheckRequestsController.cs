@@ -105,12 +105,10 @@ namespace RemoteChecker.Controllers
 
 
             Worker r = Worker.GetInstance();
-            await r.ChangeCheckRequestActivity(_context, checkRequest);
+            await r.ChangeCheckRequestActivity(checkRequest);
 
 
             return Redirect(Request.Headers["Referer"].ToString());
-
-            //return View();
         }
 
         // GET: CheckRequests/Create
@@ -136,7 +134,7 @@ namespace RemoteChecker.Controllers
                 await _context.SaveChangesAsync();
 
                 Worker r = Worker.GetInstance();
-                await r.AddCheckRequest(_context, checkRequest);
+                await r.AddCheckRequest(checkRequest);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -189,22 +187,19 @@ namespace RemoteChecker.Controllers
 
 
             Worker r = Worker.GetInstance();
-            await r.ForceCheckRequest(_context, checkRequest);
+            int res = await r.ForceCheckRequest(checkRequest);
 
-
-            /*CheckHistory ch = new()
+            CheckHistory ch = new()
             {
                 CheckID = checkRequest.ID,
                 Moment = DateTime.Now,
-                // todo: Обновить
-                // Result = 200
-                Result = await CheckerLogics.PingUrl.PingUrlAsync(checkRequest.HostAddress)
+                Result = res,
+                CheckRequest = checkRequest
             };
-
-            checkRequest.CheckHistories.Add(ch);
-
             _context.Add(ch);
-            await _context.SaveChangesAsync();*/
+            await _context.SaveChangesAsync();
+
+
             return Redirect(Request.Headers["Referer"].ToString());
 
         }
@@ -235,7 +230,7 @@ namespace RemoteChecker.Controllers
                     await _context.SaveChangesAsync();
 
                     Worker r = Worker.GetInstance();
-                    await r.EditCheckRequest(_context, checkRequest);
+                    await r.EditCheckRequest(checkRequest);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -283,11 +278,18 @@ namespace RemoteChecker.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var checkRequest = await _context.CheckRequests.FindAsync(id);
+
+            var l = _context.CheckHistories.Where(x => x.CheckRequest == checkRequest).ToList();
+            foreach (var item in l)
+            {
+                _context.Remove(item);
+            }
+
             _context.CheckRequests.Remove(checkRequest);
             await _context.SaveChangesAsync();
 
             Worker r = Worker.GetInstance();
-            await r.RemoveCheckRequest(_context, checkRequest);
+            await r.RemoveCheckRequest(checkRequest);
             return RedirectToAction(nameof(Index));
         }
 
@@ -295,5 +297,8 @@ namespace RemoteChecker.Controllers
         {
             return _context.CheckRequests.Any(e => e.ID == id);
         }
+
+
+
     }
 }

@@ -11,12 +11,16 @@ namespace RemoteChecker.CheckerLogics
 {
     public class Worker
     {
+        public static string Connection { get; set; }
+
+
         private static Worker _instance;
         private bool isInit = false;
+        private CheckContext _context;
 
         public Worker()
         {
-            _instance = this;
+            _context = new CheckContext(Connection);
         }
 
         public static Worker GetInstance()
@@ -29,26 +33,26 @@ namespace RemoteChecker.CheckerLogics
         private ConcurrentDictionary<(string Host, string Cron), (List<(int, bool)> CrIds, DateTime? NextOccurence)> tasks = new();
         private DateTime min;
 
-        public async Task InitWorker(CheckContext context)
+        public async Task InitWorker()
         {
             min = DateTime.MaxValue;
             isInit = true;
 
-            foreach (var cr in context.CheckRequests)
+
+            foreach (var cr in _context.CheckRequests)
             {
-                var time = await AddCheckRequest(context, cr);
+                var time = await AddCheckRequest(cr);
                 if (time != null && time < min)
                     min = (DateTime)time;
             }
 
-            await CallCheckRequestTasks(context);
-            //RemoveCheckRequest(_context.CheckRequests.Where(x => x.HostAddress == "ibm.com").Skip(0).FirstOrDefault());
+            await CallCheckRequestTasks();
         }
 
-        public async Task RemoveCheckRequest(CheckContext context, CheckRequest cr, (string, string) realkey = default((string, string)))
+        public async Task RemoveCheckRequest(CheckRequest cr, (string, string) realkey = default)
         {
             if (!isInit)
-                await InitWorker(context);
+                await InitWorker();
 
             var t1 = realkey == default ? (cr.HostAddress, cr.Cron) : realkey;
             if (!tasks.ContainsKey(t1))
@@ -65,10 +69,10 @@ namespace RemoteChecker.CheckerLogics
                 tasks.Remove(t1, out _);
         }
 
-        public async Task<DateTime?> AddCheckRequest(CheckContext context, CheckRequest cr)
+        public async Task<DateTime?> AddCheckRequest(CheckRequest cr)
         {
             if (!isInit)
-                await InitWorker(context);
+                await InitWorker();
 
 
             if (cr == null)
@@ -100,30 +104,21 @@ namespace RemoteChecker.CheckerLogics
             return nextUtc;
         }
 
-        public async Task ForceCheckRequest(CheckContext context, CheckRequest cr)
+        public async Task<int> ForceCheckRequest(CheckRequest cr)
         {
             if (!isInit)
-                await InitWorker(context);
+                await InitWorker();
             var (HostAddress, _) = (cr.HostAddress, cr.Cron);
 
             int res = await PingUrl.PingUrlAsync(HostAddress);
-            CheckHistory ch = new()
-            {
-                CheckID = cr.ID,
-                Moment = DateTime.Now,
-                Result = res,
-                CheckRequest = cr
-            };
-            context.Add(ch);
-            await context.SaveChangesAsync();
+            return res;
         }
 
-        public async Task EditCheckRequest(CheckContext context, CheckRequest cr)
+        public async Task EditCheckRequest(CheckRequest cr)
         {
             if (!isInit)
-                await InitWorker(context);
+                await InitWorker();
 
-            (string, string) v;
             var t1 = (cr.HostAddress, cr.Cron);
 
             foreach (var key in tasks.Keys)
@@ -135,14 +130,14 @@ namespace RemoteChecker.CheckerLogics
                     {
                         if (item.CrIds[i].Item2 != cr.Active)
                         {
-                            await ChangeCheckRequestActivity(context, cr);
+                            await ChangeCheckRequestActivity(cr);
                             return;
                         }
 
                         if (t1 != key)
                         {
-                            await RemoveCheckRequest(context, cr, key);
-                            await AddCheckRequest(context, cr);
+                            await RemoveCheckRequest(cr, key);
+                            await AddCheckRequest(cr);
                             return;
                         }
                     }
@@ -150,10 +145,10 @@ namespace RemoteChecker.CheckerLogics
             }
         }
 
-        public async Task ChangeCheckRequestActivity(CheckContext context, CheckRequest cr)
+        public async Task ChangeCheckRequestActivity(CheckRequest cr)
         {
             if (!isInit)
-                await InitWorker(context);
+                await InitWorker();
 
             var t1 = (cr.HostAddress, cr.Cron);
 
@@ -171,11 +166,10 @@ namespace RemoteChecker.CheckerLogics
             }
         }
 
-        public async Task CallCheckRequestTasks(CheckContext context)
+        public async Task CallCheckRequestTasks()
         {
             if (!isInit)
-                await InitWorker(context);
-
+                await InitWorker();
 
             DateTime dt = DateTime.Now;
 
@@ -193,7 +187,7 @@ namespace RemoteChecker.CheckerLogics
                         if (task.Value.CrIds[i].Item2)
                         {
                             int res = await PingUrl.PingUrlAsync(task.Key.Host);
-                            CheckRequest cr = context.CheckRequests.Where(x => x.ID == task.Value.CrIds[i].Item1).FirstOrDefault();
+                            CheckRequest cr = _context.CheckRequests.Where(x => x.ID == task.Value.CrIds[i].Item1).FirstOrDefault();
                             CheckHistory ch = new()
                             {
                                 CheckID = task.Value.CrIds[i].Item1,
@@ -201,13 +195,19 @@ namespace RemoteChecker.CheckerLogics
                                 Result = res,
                                 CheckRequest = cr
                             };
-                            context.Add(ch);
-                            await context.SaveChangesAsync();
+                            _context.Add(ch);
+                            await _context.SaveChangesAsync();
                         }
                     }
 
                 }
             }
         }
+
+        /*public Task Work()
+        {
+            return;
+        }*/
+
     }
 }
