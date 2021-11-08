@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Cronos;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,12 @@ namespace RemoteChecker.CheckerLogics
         public Worker()
         {
             _context = new CheckContext(Connection);
+
+            Thread t = new(new ThreadStart(Work))
+            {
+                Name = "Background ckecker thread"
+            };
+            t.Start();
         }
 
         public static Worker GetInstance()
@@ -83,6 +90,10 @@ namespace RemoteChecker.CheckerLogics
             DateTimeOffset? offset = CronExpression.Parse(cr.Cron).GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
             var nextUtc = offset?.DateTime;
 
+
+            if (nextUtc != null && nextUtc < min)
+                min = (DateTime)nextUtc;
+
             if (tasks.Keys.Contains(t1))
             {
                 var l = tasks[t1].CrIds;
@@ -95,9 +106,6 @@ namespace RemoteChecker.CheckerLogics
                     {
                         (cr.ID, cr.Active)
                     };
-
-                Action<string> f = (z) => throw new Exception(z);
-
                 tasks.AddOrUpdate(t1, (crIds, nextUtc), (a1, a2) => (crIds, nextUtc));
             }
 
@@ -108,10 +116,38 @@ namespace RemoteChecker.CheckerLogics
         {
             if (!isInit)
                 await InitWorker();
-            var (HostAddress, _) = (cr.HostAddress, cr.Cron);
 
-            int res = await PingUrl.PingUrlAsync(HostAddress);
+
+            var t1 = (cr.HostAddress, cr.Cron);
+
+            DateTimeOffset? offset = CronExpression.Parse(cr.Cron).GetNextOccurrence(DateTimeOffset.Now, TimeZoneInfo.Local);
+            var nextUtc = offset?.DateTime;
+
+            if (nextUtc != null && nextUtc < min)
+                min = (DateTime)nextUtc;
+
+            int res = await PingUrl.PingUrlAsync(cr.HostAddress);
+
+            var (CrIds, NextOccurence) = tasks[t1];
+
+            if (nextUtc > NextOccurence)
+                tasks.AddOrUpdate(t1, (CrIds, nextUtc), (a1, a2) => (CrIds, nextUtc));
+
             return res;
+        }
+
+
+        private async Task ForceCheckRequest(CheckRequest cr, int res)
+        {
+            CheckHistory ch = new()
+            {
+                CheckID = cr.ID,
+                Moment = DateTime.Now,
+                Result = res,
+                CheckRequest = cr
+            };
+            _context.Add(ch);
+            await _context.SaveChangesAsync();
         }
 
         public async Task EditCheckRequest(CheckRequest cr)
@@ -123,12 +159,12 @@ namespace RemoteChecker.CheckerLogics
 
             foreach (var key in tasks.Keys)
             {
-                var item = tasks[key];
-                for (int i = 0; i < item.CrIds.Count; i++)
+                var (CrIds, _) = tasks[key];
+                for (int i = 0; i < CrIds.Count; i++)
                 {
-                    if (item.CrIds[i].Item1 == cr.ID)
+                    if (CrIds[i].Item1 == cr.ID)
                     {
-                        if (item.CrIds[i].Item2 != cr.Active)
+                        if (CrIds[i].Item2 != cr.Active)
                         {
                             await ChangeCheckRequestActivity(cr);
                             return;
@@ -192,8 +228,7 @@ namespace RemoteChecker.CheckerLogics
                             {
                                 CheckID = task.Value.CrIds[i].Item1,
                                 Moment = dt,
-                                Result = res,
-                                CheckRequest = cr
+                                Result = res
                             };
                             _context.Add(ch);
                             await _context.SaveChangesAsync();
@@ -204,10 +239,44 @@ namespace RemoteChecker.CheckerLogics
             }
         }
 
-        /*public Task Work()
+        public async void Work()
         {
-            return;
-        }*/
+            if (!isInit)
+                await InitWorker();
+
+
+            while (true)
+            {
+                DateTime now = DateTime.Now;
+
+                if (now < min)
+                {
+                    await Task.Delay(1000);
+                    continue;
+                }
+
+                foreach (var key in tasks.Keys)
+                {
+                    var (CrIds, NextOccurence) = tasks[key];
+
+                    if (now < NextOccurence)
+                        continue;
+
+                    foreach ((int crid, bool active) in CrIds)
+                    {
+                        if (!active)
+                            continue;
+
+                        var t = _context.CheckRequests.Where(x => x.ID == crid).FirstOrDefault();
+
+                        if (t == null)
+                            continue;
+
+                        await ForceCheckRequest(t, await ForceCheckRequest(t));
+                    }
+                }
+            }
+        }
 
     }
 }
