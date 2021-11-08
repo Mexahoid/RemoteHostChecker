@@ -110,6 +110,17 @@ namespace RemoteChecker.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var person = await _context.Persons.FindAsync(id);
+
+            var c = _context.CheckRequests.Where(x => x.Person == person).ToList();
+            foreach (var cr in c)
+            {
+                var l = _context.CheckHistories.Where(x => x.CheckRequest == cr).ToList();
+                foreach (var item in l)
+                {
+                    _context.Remove(item);
+                }
+                _context.Remove(cr);
+            }
             _context.Persons.Remove(person);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
